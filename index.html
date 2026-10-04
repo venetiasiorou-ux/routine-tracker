@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111318">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Routine">
+<title>October Routine</title>
+<style>
+:root{color-scheme:dark;--bg:#0e1014;--card:#181b21;--card2:#20242c;--text:#f5f7fb;--muted:#9ca5b5;--accent:#8fb3ff;--ok:#77d69b;--line:#2c313b}
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:680px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(90px + env(safe-area-inset-bottom))}
+h1{font-size:28px;margin:6px 0 4px}.sub{color:var(--muted);margin-bottom:18px}
+.top{display:flex;gap:10px;align-items:center;margin-bottom:16px}.top button{flex:1}
+button{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:14px;padding:12px;font-size:15px}
+.progress{background:var(--card);padding:14px;border-radius:18px;margin-bottom:16px}.bar{height:9px;background:#292e37;border-radius:99px;overflow:hidden;margin-top:10px}.fill{height:100%;background:var(--ok);width:0}
+.date{font-size:20px;font-weight:700;margin:20px 2px 10px}
+.task{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);padding:13px;border-radius:16px;margin:8px 0}
+.task input{width:24px;height:24px;accent-color:var(--ok);flex:none}.task.done .label{text-decoration:line-through;color:var(--muted)}
+.time{font-size:12px;color:var(--accent);min-width:78px}.label{font-size:16px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(14,16,20,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px}
+nav button{flex:1}.today{border-color:#587bc4}
+.small{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<h1>October Routine</h1>
+<div class="sub">Οκτώβριος 2026 · καθημερινό checklist</div>
+<div class="progress"><strong id="monthText">Μηνιαία πρόοδος</strong><div class="bar"><div class="fill" id="monthFill"></div></div><div class="small" id="monthStats"></div></div>
+<div class="top"><button onclick="move(-1)">← Προηγούμενη</button><button class="today" onclick="goToday()">Σήμερα</button><button onclick="move(1)">Επόμενη →</button></div>
+<div id="content"></div>
+</main>
+<nav><button onclick="resetDay()">Καθαρισμός ημέρας</button><button onclick="resetAll()">Reset Οκτωβρίου</button></nav>
+<script>
+const S={
+1:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Προπόνηση"],["16:00–16:50","Ντους / ελεύθερος χρόνος"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+2:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Προπόνηση"],["16:00–16:50","Ντους / ελεύθερος χρόνος"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+3:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Προπόνηση"],["16:00–16:50","Ντους / χαλάρωμα"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+4:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Καφές έξω (Playlist / μουσική)"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Καφές έξω"],["15:00–16:00","Φαγητό έξω"],["16:00–18:00","Supermarket"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+5:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Λούσιμο / περιποίηση"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Δουλειές σπιτιού"],["16:00–16:50","Ελεύθερος χρόνος"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+6:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Free hobby"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Supermarket"],["16:00–16:50","Ελεύθερος χρόνος"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+0:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Προπόνηση"],["16:00–16:50","Ντους / χαλάρωμα"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]]
+};
+const names=["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
+let day=Math.min(31,Math.max(1,new Date().getMonth()==9&&new Date().getFullYear()==2026?new Date().getDate():1));
+const key="octoberRoutine2026"; let data=JSON.parse(localStorage.getItem(key)||"{}");
+function tasks(d){return S[new Date(2026,9,d).getDay()]}
+function save(){localStorage.setItem(key,JSON.stringify(data));updateMonth()}
+function render(){
+ const date=new Date(2026,9,day), list=tasks(day), done=(data[day]||{});
+ let n=Object.values(done).filter(Boolean).length;
+ document.getElementById("content").innerHTML=`<div class="date">${names[date.getDay()]} ${day} Οκτωβρίου <span class="small">· ${n}/${list.length}</span></div>`+
+ list.map((x,i)=>`<label class="task ${done[i]?"done":""}"><input type="checkbox" ${done[i]?"checked":""} onchange="tick(${i},this.checked)"><span class="time">${x[0]}</span><span class="label">${x[1]}</span></label>`).join("");
+ updateMonth()
+}
+function tick(i,v){data[day]=data[day]||{};data[day][i]=v;save();render()}
+function move(n){day=Math.min(31,Math.max(1,day+n));render();scrollTo(0,0)}
+function goToday(){let d=new Date();day=(d.getFullYear()==2026&&d.getMonth()==9)?d.getDate():1;render()}
+function resetDay(){if(confirm("Να καθαρίσουν τα ✓ αυτής της ημέρας;")){delete data[day];save();render()}}
+function resetAll(){if(confirm("Να διαγραφούν ΟΛΑ τα ✓ του Οκτωβρίου;")){data={};save();render()}}
+function updateMonth(){
+ let total=0,done=0;
+ for(let d=1;d<=31;d++){let l=tasks(d);total+=l.length;done+=Object.values(data[d]||{}).filter(Boolean).length}
+ let p=Math.round(done/total*100);
+ document.getElementById("monthText").textContent=`Μηνιαία πρόοδος · ${p}%`;
+ document.getElementById("monthFill").style.width=p+"%";
+ document.getElementById("monthStats").textContent=`${done} από ${total} δραστηριότητες`;
+}
+render();
+</script>
+</body>
+</html>
