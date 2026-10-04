@@ -23,6 +23,14 @@ button{border:1px solid var(--line);background:var(--card2);color:var(--text);bo
 nav{position:fixed;bottom:0;left:0;right:0;background:rgba(14,16,20,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px}
 nav button{flex:1}.today{border-color:#587bc4}
 .small{font-size:13px;color:var(--muted)}
+.task{cursor:pointer}.taskBody{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.editBtn{flex:none;padding:8px 10px;border-radius:10px;font-size:18px;background:transparent}
+.addBtn{width:100%;margin:14px 0 4px;border:1px dashed #587bc4;color:var(--accent);background:transparent}
+.modal{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.65);align-items:flex-end;justify-content:center}
+.modal.show{display:flex}.sheet{width:100%;max-width:680px;background:#181b21;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
+.sheet h2{margin:0 0 16px}.sheet label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}
+.sheet input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0e1014;color:var(--text);font-size:16px}
+.actions{display:flex;gap:9px;margin-top:18px}.actions button{flex:1}.danger{color:#ff8e8e;border-color:#6a3434}
 </style>
 </head>
 <body>
@@ -34,6 +42,18 @@ nav button{flex:1}.today{border-color:#587bc4}
 <div id="content"></div>
 </main>
 <nav><button onclick="resetDay()">Καθαρισμός ημέρας</button><button onclick="resetAll()">Reset Οκτωβρίου</button></nav>
+<div class="modal" id="modal" onclick="backdrop(event)">
+ <div class="sheet">
+  <h2 id="modalTitle">Δραστηριότητα</h2>
+  <label>Ώρα</label><input id="editTime" placeholder="π.χ. 17:00–18:00">
+  <label>Δραστηριότητα</label><input id="editLabel" placeholder="π.χ. Γιατρός">
+  <div class="actions">
+   <button onclick="closeModal()">Άκυρο</button>
+   <button id="deleteBtn" class="danger" onclick="deleteTask()">Διαγραφή</button>
+   <button onclick="saveTask()">Αποθήκευση</button>
+  </div>
+ </div>
+</div>
 <script>
 const S={
 1:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Προπόνηση"],["16:00–16:50","Ντους / ελεύθερος χρόνος"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
@@ -46,21 +66,36 @@ const S={
 };
 const names=["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
 let day=Math.min(31,Math.max(1,new Date().getMonth()==9&&new Date().getFullYear()==2026?new Date().getDate():1));
-const key="octoberRoutine2026"; let data=JSON.parse(localStorage.getItem(key)||"{}");
-function tasks(d){return S[new Date(2026,9,d).getDay()]}
-function save(){localStorage.setItem(key,JSON.stringify(data));updateMonth()}
+const key="octoberRoutine2026", customKey="octoberRoutine2026.custom";
+let data=JSON.parse(localStorage.getItem(key)||"{}");
+let custom=JSON.parse(localStorage.getItem(customKey)||"{}");
+let editing=null;
+function defaults(d){return S[new Date(2026,9,d).getDay()].map(x=>[x[0],x[1]])}
+function tasks(d){return custom[d] || defaults(d)}
+function save(){localStorage.setItem(key,JSON.stringify(data));localStorage.setItem(customKey,JSON.stringify(custom));updateMonth()}
 function render(){
  const date=new Date(2026,9,day), list=tasks(day), done=(data[day]||{});
  let n=Object.values(done).filter(Boolean).length;
  document.getElementById("content").innerHTML=`<div class="date">${names[date.getDay()]} ${day} Οκτωβρίου <span class="small">· ${n}/${list.length}</span></div>`+
- list.map((x,i)=>`<label class="task ${done[i]?"done":""}"><input type="checkbox" ${done[i]?"checked":""} onchange="tick(${i},this.checked)"><span class="time">${x[0]}</span><span class="label">${x[1]}</span></label>`).join("");
+ list.map((x,i)=>`<div class="task ${done[i]?"done":""}"><label class="taskBody"><input type="checkbox" ${done[i]?"checked":""} onchange="tick(${i},this.checked)"><span class="time">${esc(x[0])}</span><span class="label">${esc(x[1])}</span></label><button class="editBtn" onclick="openEdit(${i})" aria-label="Επεξεργασία">✎</button></div>`).join("")+
+ `<button class="addBtn" onclick="openAdd()">＋ Προσθήκη δραστηριότητας</button>`+
+ (custom[day]?`<button class="addBtn" onclick="restoreDay()">↺ Επαναφορά αρχικού προγράμματος</button>`:"");
  updateMonth()
 }
 function tick(i,v){data[day]=data[day]||{};data[day][i]=v;save();render()}
 function move(n){day=Math.min(31,Math.max(1,day+n));render();scrollTo(0,0)}
 function goToday(){let d=new Date();day=(d.getFullYear()==2026&&d.getMonth()==9)?d.getDate():1;render()}
 function resetDay(){if(confirm("Να καθαρίσουν τα ✓ αυτής της ημέρας;")){delete data[day];save();render()}}
-function resetAll(){if(confirm("Να διαγραφούν ΟΛΑ τα ✓ του Οκτωβρίου;")){data={};save();render()}}
+function resetAll(){if(confirm("Να διαγραφούν ΟΛΑ τα ✓ του Οκτωβρίου; Οι αλλαγές δραστηριοτήτων θα παραμείνουν.")){data={};save();render()}}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#039;"}[c]))}
+function ensureCustom(){if(!custom[day]) custom[day]=defaults(day)}
+function openEdit(i){editing=i;let x=tasks(day)[i];document.getElementById("modalTitle").textContent="Επεξεργασία";document.getElementById("editTime").value=x[0];document.getElementById("editLabel").value=x[1];document.getElementById("deleteBtn").style.display="block";document.getElementById("modal").classList.add("show")}
+function openAdd(){editing=-1;document.getElementById("modalTitle").textContent="Νέα δραστηριότητα";document.getElementById("editTime").value="";document.getElementById("editLabel").value="";document.getElementById("deleteBtn").style.display="none";document.getElementById("modal").classList.add("show")}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+function backdrop(e){if(e.target.id==="modal")closeModal()}
+function saveTask(){let t=document.getElementById("editTime").value.trim(),l=document.getElementById("editLabel").value.trim();if(!t||!l){alert("Συμπλήρωσε ώρα και δραστηριότητα.");return}ensureCustom();if(editing===-1)custom[day].push([t,l]);else custom[day][editing]=[t,l];save();closeModal();render()}
+function deleteTask(){if(editing<0)return;if(!confirm("Να διαγραφεί αυτή η δραστηριότητα;"))return;ensureCustom();custom[day].splice(editing,1);let old=data[day]||{},next={};Object.keys(old).forEach(k=>{let n=+k;if(n<editing)next[n]=old[k];else if(n>editing)next[n-1]=old[k]});data[day]=next;save();closeModal();render()}
+function restoreDay(){if(confirm("Να επανέλθει αυτή η ημέρα στο αρχικό εβδομαδιαίο πρόγραμμα;")){delete custom[day];delete data[day];save();render()}}
 function updateMonth(){
  let total=0,done=0;
  for(let d=1;d<=31;d++){let l=tasks(d);total+=l.length;done+=Object.values(data[d]||{}).filter(Boolean).length}
