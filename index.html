@@ -87,7 +87,7 @@ function move(n){day=Math.min(31,Math.max(1,day+n));render();scrollTo(0,0)}
 function goToday(){let d=new Date();day=(d.getFullYear()==2026&&d.getMonth()==9)?d.getDate():1;render()}
 function resetDay(){if(confirm("Να καθαρίσουν τα ✓ αυτής της ημέρας;")){delete data[day];save();render()}}
 function resetAll(){if(confirm("Να διαγραφούν ΟΛΑ τα ✓ του Οκτωβρίου; Οι αλλαγές δραστηριοτήτων θα παραμείνουν.")){data={};save();render()}}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#039;"}[c]))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function ensureCustom(){if(!custom[day]) custom[day]=defaults(day)}
 function openEdit(i){editing=i;let x=tasks(day)[i];document.getElementById("modalTitle").textContent="Επεξεργασία";document.getElementById("editTime").value=x[0];document.getElementById("editLabel").value=x[1];document.getElementById("deleteBtn").style.display="block";document.getElementById("modal").classList.add("show")}
 function openAdd(){editing=-1;document.getElementById("modalTitle").textContent="Νέα δραστηριότητα";document.getElementById("editTime").value="";document.getElementById("editLabel").value="";document.getElementById("deleteBtn").style.display="none";document.getElementById("modal").classList.add("show")}
