@@ -23,13 +23,15 @@ button{border:1px solid var(--line);background:var(--card2);color:var(--text);bo
 nav{position:fixed;bottom:0;left:0;right:0;background:rgba(14,16,20,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px}
 nav button{flex:1}.today{border-color:#587bc4}
 .small{font-size:13px;color:var(--muted)}
-.task{cursor:pointer}.taskBody{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.task{cursor:pointer;border-left:5px solid var(--cat,#8b95a7);background:color-mix(in srgb,var(--cat,#8b95a7) 11%,var(--card))}.taskBody{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
 .editBtn{flex:none;padding:8px 10px;border-radius:10px;font-size:18px;background:transparent}
 .addBtn{width:100%;margin:14px 0 4px;border:1px dashed #587bc4;color:var(--accent);background:transparent}
 .modal{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.65);align-items:flex-end;justify-content:center}
 .modal.show{display:flex}.sheet{width:100%;max-width:680px;background:#181b21;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
 .sheet h2{margin:0 0 16px}.sheet label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}
 .sheet input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0e1014;color:var(--text);font-size:16px}
+.notes{display:none;margin:-2px 8px 12px 52px;padding:10px 12px;border-left:2px solid var(--line);color:#cbd2de;font-size:14px;white-space:pre-wrap}.notes.show{display:block}
+.sheet textarea,.sheet select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0e1014;color:var(--text);font-size:16px}.sheet textarea{min-height:90px;resize:vertical}
 .actions{display:flex;gap:9px;margin-top:18px}.actions button{flex:1}.danger{color:#ff8e8e;border-color:#6a3434}
 </style>
 </head>
@@ -47,6 +49,8 @@ nav button{flex:1}.today{border-color:#587bc4}
   <h2 id="modalTitle">Δραστηριότητα</h2>
   <label>Ώρα</label><input id="editTime" placeholder="π.χ. 17:00–18:00">
   <label>Δραστηριότητα</label><input id="editLabel" placeholder="π.χ. Γιατρός">
+  <label>Κατηγορία</label><select id="editCat"><option value="routine">Ρουτίνα</option><option value="hobby">Χόμπι</option><option value="study">Σπουδές</option><option value="food">Φαγητό / έξοδος</option><option value="exercise">Άσκηση</option><option value="free">Ελεύθερος χρόνος</option><option value="errand">Δουλειές / ψώνια</option><option value="commute">Μετακίνηση</option><option value="work">Δουλειά</option><option value="sleep">Ύπνος</option><option value="event">Event</option></select>
+  <label>Σημειώσεις <span class="small">(φαίνονται μόνο όταν πατήσεις τη δραστηριότητα)</span></label><textarea id="editNotes" placeholder="Γράψε σημειώσεις..."></textarea>
   <div class="actions">
    <button onclick="closeModal()">Άκυρο</button>
    <button id="deleteBtn" class="danger" onclick="deleteTask()">Διαγραφή</button>
@@ -55,18 +59,20 @@ nav button{flex:1}.today{border-color:#587bc4}
  </div>
 </div>
 <script>
+const COLORS={routine:"#8b95a7",hobby:"#b18cff",study:"#5ca8ff",food:"#f2a65a",exercise:"#58d68d",free:"#5ed5d1",errand:"#f3cf5b",commute:"#a7b0bf",work:"#ff6f7d",sleep:"#7184c7",event:"#ff91c8"};
+function autoCat(label){label=label.toLowerCase();if(label.includes("ζωγραφ")||label.includes("μπάσο")||label.includes("hobby"))return "hobby";if(label.includes("διπλω"))return "study";if(label.includes("προπό"))return "exercise";if(label.includes("ελεύθερ"))return "free";if(label.includes("φαγη")||label.includes("καφές έξω"))return "food";if(label.includes("supermarket")||label.includes("δουλειές σπιτι"))return "errand";if(label.includes("μετάβαση"))return "commute";if(label.includes("δουλειά")||label.includes("άφιξη"))return "work";if(label.includes("ύπνο"))return "sleep";return "routine"}
 const S={
-1:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Προπόνηση"],["16:00–16:50","Ντους / ελεύθερος χρόνος"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-2:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Προπόνηση"],["16:00–16:50","Ντους / ελεύθερος χρόνος"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-3:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Προπόνηση"],["16:00–16:50","Ντους / χαλάρωμα"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-4:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Καφές έξω (Playlist / μουσική)"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Καφές έξω"],["15:00–16:00","Φαγητό έξω"],["16:00–18:00","Supermarket"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-5:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Λούσιμο / περιποίηση"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Δουλειές σπιτιού"],["16:00–16:50","Ελεύθερος χρόνος"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-6:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Free hobby"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Supermarket"],["16:00–16:50","Ελεύθερος χρόνος"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-0:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Προπόνηση"],["16:00–16:50","Ντους / χαλάρωμα"],["16:50–18:00","Ετοιμασία + μετάβαση"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]]
+1:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Ελεύθερος χρόνος"],["16:00–16:50","Προπόνηση"],["16:50–17:35","Ντους / ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+2:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Ελεύθερος χρόνος"],["16:00–16:50","Προπόνηση"],["16:50–17:35","Ντους / ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+3:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Ελεύθερος χρόνος"],["16:00–16:50","Προπόνηση"],["16:50–17:35","Ντους / ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+4:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Καφές έξω (Playlist / μουσική)"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Καφές έξω"],["15:00–16:00","Φαγητό έξω"],["16:00–17:35","Supermarket"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+5:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Λούσιμο / περιποίηση"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Δουλειές σπιτιού"],["16:00–16:50","Ελεύθερος χρόνος"],["16:50–17:35","Ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+6:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Free hobby"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Supermarket"],["16:00–16:50","Ελεύθερος χρόνος"],["16:50–17:35","Ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
+0:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Ελεύθερος χρόνος"],["16:00–16:50","Προπόνηση"],["16:50–17:35","Ντους / ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]]
 };
 const names=["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
 let day=Math.min(31,Math.max(1,new Date().getMonth()==9&&new Date().getFullYear()==2026?new Date().getDate():1));
-const key="octoberRoutine2026", customKey="octoberRoutine2026.custom";
+const key="octoberRoutine2026.v5", customKey="octoberRoutine2026.v5.custom";
 let data=JSON.parse(localStorage.getItem(key)||"{}");
 let custom=JSON.parse(localStorage.getItem(customKey)||"{}");
 let editing=null;
@@ -77,23 +83,24 @@ function render(){
  const date=new Date(2026,9,day), list=tasks(day), done=(data[day]||{});
  let n=Object.values(done).filter(Boolean).length;
  document.getElementById("content").innerHTML=`<div class="date">${names[date.getDay()]} ${day} Οκτωβρίου <span class="small">· ${n}/${list.length}</span></div>`+
- list.map((x,i)=>`<div class="task ${done[i]?"done":""}"><label class="taskBody"><input type="checkbox" ${done[i]?"checked":""} onchange="tick(${i},this.checked)"><span class="time">${esc(x[0])}</span><span class="label">${esc(x[1])}</span></label><button class="editBtn" onclick="openEdit(${i})" aria-label="Επεξεργασία">✎</button></div>`).join("")+
+ list.map((x,i)=>`<div><div class="task ${done[i]?"done":""}" style="--cat:${COLORS[x[3]||autoCat(x[1])]}" onclick="toggleNotes(${i})"><label class="taskBody" onclick="event.stopPropagation()"><input type="checkbox" ${done[i]?"checked":""} onchange="tick(${i},this.checked)"><span class="time">${esc(x[0])}</span><span class="label">${esc(x[1])}</span></label><button class="editBtn" onclick="event.stopPropagation();openEdit(${i})" aria-label="Επεξεργασία">✎</button></div>${x[2]?`<div class="notes" id="note-${i}">${esc(x[2])}</div>`:""}</div>`).join("")+
  `<button class="addBtn" onclick="openAdd()">＋ Προσθήκη δραστηριότητας</button>`+
  (custom[day]?`<button class="addBtn" onclick="restoreDay()">↺ Επαναφορά αρχικού προγράμματος</button>`:"");
  updateMonth()
 }
 function tick(i,v){data[day]=data[day]||{};data[day][i]=v;save();render()}
+function toggleNotes(i){let el=document.getElementById("note-"+i);if(el)el.classList.toggle("show")}
 function move(n){day=Math.min(31,Math.max(1,day+n));render();scrollTo(0,0)}
 function goToday(){let d=new Date();day=(d.getFullYear()==2026&&d.getMonth()==9)?d.getDate():1;render()}
 function resetDay(){if(confirm("Να καθαρίσουν τα ✓ αυτής της ημέρας;")){delete data[day];save();render()}}
 function resetAll(){if(confirm("Να διαγραφούν ΟΛΑ τα ✓ του Οκτωβρίου; Οι αλλαγές δραστηριοτήτων θα παραμείνουν.")){data={};save();render()}}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function ensureCustom(){if(!custom[day]) custom[day]=defaults(day)}
-function openEdit(i){editing=i;let x=tasks(day)[i];document.getElementById("modalTitle").textContent="Επεξεργασία";document.getElementById("editTime").value=x[0];document.getElementById("editLabel").value=x[1];document.getElementById("deleteBtn").style.display="block";document.getElementById("modal").classList.add("show")}
-function openAdd(){editing=-1;document.getElementById("modalTitle").textContent="Νέα δραστηριότητα";document.getElementById("editTime").value="";document.getElementById("editLabel").value="";document.getElementById("deleteBtn").style.display="none";document.getElementById("modal").classList.add("show")}
+function openEdit(i){editing=i;let x=tasks(day)[i];modalTitle.textContent="Επεξεργασία";editTime.value=x[0];editLabel.value=x[1];editNotes.value=x[2]||"";editCat.value=x[3]||autoCat(x[1]);deleteBtn.style.display="block";modal.classList.add("show")}
+function openAdd(){editing=-1;modalTitle.textContent="Νέα δραστηριότητα";editTime.value="";editLabel.value="";editNotes.value="";editCat.value="event";deleteBtn.style.display="none";modal.classList.add("show")}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
 function backdrop(e){if(e.target.id==="modal")closeModal()}
-function saveTask(){let t=document.getElementById("editTime").value.trim(),l=document.getElementById("editLabel").value.trim();if(!t||!l){alert("Συμπλήρωσε ώρα και δραστηριότητα.");return}ensureCustom();if(editing===-1)custom[day].push([t,l]);else custom[day][editing]=[t,l];save();closeModal();render()}
+function saveTask(){let t=editTime.value.trim(),l=editLabel.value.trim(),n=editNotes.value.trim(),c=editCat.value;if(!t||!l){alert("Συμπλήρωσε ώρα και δραστηριότητα.");return}ensureCustom();if(editing===-1)custom[day].push([t,l,n,c]);else custom[day][editing]=[t,l,n,c];save();closeModal();render()}
 function deleteTask(){if(editing<0)return;if(!confirm("Να διαγραφεί αυτή η δραστηριότητα;"))return;ensureCustom();custom[day].splice(editing,1);let old=data[day]||{},next={};Object.keys(old).forEach(k=>{let n=+k;if(n<editing)next[n]=old[k];else if(n>editing)next[n-1]=old[k]});data[day]=next;save();closeModal();render()}
 function restoreDay(){if(confirm("Να επανέλθει αυτή η ημέρα στο αρχικό εβδομαδιαίο πρόγραμμα;")){delete custom[day];delete data[day];save();render()}}
 function updateMonth(){
