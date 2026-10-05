@@ -3,114 +3,132 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111318">
+<meta name="theme-color" content="#0e1014">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Routine">
 <title>October Routine</title>
 <style>
-:root{color-scheme:dark;--bg:#0e1014;--card:#181b21;--card2:#20242c;--text:#f5f7fb;--muted:#9ca5b5;--accent:#8fb3ff;--ok:#77d69b;--line:#2c313b}
-*{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-main{max-width:680px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(90px + env(safe-area-inset-bottom))}
-h1{font-size:28px;margin:6px 0 4px}.sub{color:var(--muted);margin-bottom:18px}
-.top{display:flex;gap:10px;align-items:center;margin-bottom:16px}.top button{flex:1}
-button{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:14px;padding:12px;font-size:15px}
-.progress{background:var(--card);padding:14px;border-radius:18px;margin-bottom:16px}.bar{height:9px;background:#292e37;border-radius:99px;overflow:hidden;margin-top:10px}.fill{height:100%;background:var(--ok);width:0}
-.date{font-size:20px;font-weight:700;margin:20px 2px 10px}
-.task{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);padding:13px;border-radius:16px;margin:8px 0}
-.task input{width:24px;height:24px;accent-color:var(--ok);flex:none}.task.done .label{text-decoration:line-through;color:var(--muted)}
-.time{font-size:12px;color:var(--accent);min-width:78px}.label{font-size:16px}
-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(14,16,20,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px}
-nav button{flex:1}.today{border-color:#587bc4}
-.small{font-size:13px;color:var(--muted)}
-.task{cursor:pointer;border-left:5px solid var(--cat,#8b95a7);background:color-mix(in srgb,var(--cat,#8b95a7) 11%,var(--card))}.taskBody{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
-.editBtn{flex:none;padding:8px 10px;border-radius:10px;font-size:18px;background:transparent}
+:root{color-scheme:dark;--bg:#0e1014;--card:#181b21;--card2:#20242c;--text:#f5f7fb;--muted:#9ca5b5;--accent:#8fb3ff;--ok:#77d69b;--line:#303640}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:680px;margin:auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(100px + env(safe-area-inset-bottom))}
+h1{font-size:28px;margin:6px 0 4px}.sub,.small{color:var(--muted)}.small{font-size:13px}
+.progress{background:var(--card);padding:14px;border-radius:18px;margin:16px 0}.bar{height:9px;background:#292e37;border-radius:99px;overflow:hidden;margin-top:10px}.fill{height:100%;background:var(--ok);width:0}
+.top{display:flex;gap:8px;margin-bottom:15px}.top button{flex:1}
+button{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:14px;padding:12px;font-size:15px}.today{border-color:#587bc4}
+.date{font-size:20px;font-weight:700;margin:18px 2px 10px}
+.task{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-left:5px solid var(--cat);background:color-mix(in srgb,var(--cat) 10%,var(--card));padding:12px;border-radius:16px;margin:8px 0;cursor:pointer}
+.taskMain{display:flex;align-items:center;gap:12px;flex:1;min-width:0}.task input{width:24px;height:24px;accent-color:var(--ok);flex:none}.task.done .label{text-decoration:line-through;color:var(--muted)}
+.time{font-size:12px;color:#c0cceb;min-width:78px}.label{font-size:16px}.editBtn{flex:none;padding:7px 9px;background:transparent;font-size:18px}
+.notes{display:none;margin:-2px 8px 10px 50px;padding:9px 12px;border-left:2px solid var(--line);color:#cbd2de;font-size:14px;white-space:pre-wrap}.notes.show{display:block}
 .addBtn{width:100%;margin:14px 0 4px;border:1px dashed #587bc4;color:var(--accent);background:transparent}
-.modal{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.65);align-items:flex-end;justify-content:center}
-.modal.show{display:flex}.sheet{width:100%;max-width:680px;background:#181b21;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
-.sheet h2{margin:0 0 16px}.sheet label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}
-.sheet input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0e1014;color:var(--text);font-size:16px}
-.notes{display:none;margin:-2px 8px 12px 52px;padding:10px 12px;border-left:2px solid var(--line);color:#cbd2de;font-size:14px;white-space:pre-wrap}.notes.show{display:block}
-.sheet textarea,.sheet select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0e1014;color:var(--text);font-size:16px}.sheet textarea{min-height:90px;resize:vertical}
-.actions{display:flex;gap:9px;margin-top:18px}.actions button{flex:1}.danger{color:#ff8e8e;border-color:#6a3434}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(14,16,20,.95);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:9px}nav button{flex:1}
+.modal{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.68);align-items:flex-end;justify-content:center}.modal.show{display:flex}
+.sheet{width:100%;max-width:680px;background:#181b21;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
+.sheet h2{margin:0 0 14px}.sheet label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}.sheet input,.sheet textarea,.sheet select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0e1014;color:var(--text);font-size:16px}.sheet textarea{min-height:90px;resize:vertical}
+.actions{display:flex;gap:8px;margin-top:18px}.actions button{flex:1}.danger{color:#ff9b9b;border-color:#6a3434}
 </style>
 </head>
 <body>
 <main>
 <h1>October Routine</h1>
-<div class="sub">Οκτώβριος 2026 · καθημερινό checklist</div>
+<div class="sub">Οκτώβριος 2026 · οι αλλαγές ισχύουν μόνο για τη συγκεκριμένη ημερομηνία</div>
 <div class="progress"><strong id="monthText">Μηνιαία πρόοδος</strong><div class="bar"><div class="fill" id="monthFill"></div></div><div class="small" id="monthStats"></div></div>
-<div class="top"><button onclick="move(-1)">← Προηγούμενη</button><button class="today" onclick="goToday()">Σήμερα</button><button onclick="move(1)">Επόμενη →</button></div>
+<div class="top"><button onclick="move(-1)">←</button><button class="today" onclick="goToday()">Σήμερα</button><button onclick="move(1)">→</button></div>
 <div id="content"></div>
 </main>
-<nav><button onclick="resetDay()">Καθαρισμός ημέρας</button><button onclick="resetAll()">Reset Οκτωβρίου</button></nav>
+<nav><button onclick="clearChecks()">Καθαρισμός ✓ ημέρας</button><button onclick="restoreDay()">Επαναφορά ημέρας</button></nav>
+
 <div class="modal" id="modal" onclick="backdrop(event)">
- <div class="sheet">
-  <h2 id="modalTitle">Δραστηριότητα</h2>
-  <label>Ώρα</label><input id="editTime" placeholder="π.χ. 17:00–18:00">
-  <label>Δραστηριότητα</label><input id="editLabel" placeholder="π.χ. Γιατρός">
-  <label>Κατηγορία</label><select id="editCat"><option value="routine">Ρουτίνα</option><option value="hobby">Χόμπι</option><option value="study">Σπουδές</option><option value="food">Φαγητό / έξοδος</option><option value="exercise">Άσκηση</option><option value="free">Ελεύθερος χρόνος</option><option value="errand">Δουλειές / ψώνια</option><option value="commute">Μετακίνηση</option><option value="work">Δουλειά</option><option value="sleep">Ύπνος</option><option value="event">Event</option></select>
-  <label>Σημειώσεις <span class="small">(φαίνονται μόνο όταν πατήσεις τη δραστηριότητα)</span></label><textarea id="editNotes" placeholder="Γράψε σημειώσεις..."></textarea>
-  <div class="actions">
-   <button onclick="closeModal()">Άκυρο</button>
-   <button id="deleteBtn" class="danger" onclick="deleteTask()">Διαγραφή</button>
-   <button onclick="saveTask()">Αποθήκευση</button>
-  </div>
- </div>
-</div>
+<div class="sheet">
+<h2 id="modalTitle">Δραστηριότητα</h2>
+<label>Ώρα</label><input id="editTime" placeholder="π.χ. 14:00–14:30">
+<label>Δραστηριότητα</label><input id="editLabel" placeholder="π.χ. Γιατρός">
+<label>Κατηγορία</label>
+<select id="editCat">
+<option value="routine">Ρουτίνα / προσωπικά</option><option value="hobby">Χόμπι</option><option value="study">Σπουδές</option>
+<option value="food">Φαγητό / έξοδος</option><option value="exercise">Άσκηση</option><option value="free">Ελεύθερος χρόνος</option>
+<option value="errand">Δουλειές / ψώνια</option><option value="commute">Μετακίνηση</option><option value="work">Δουλειά</option>
+<option value="sleep">Ύπνος</option><option value="event">Ραντεβού / event</option>
+</select>
+<label>Σημειώσεις <span class="small">(εμφανίζονται μόνο όταν πατήσεις τη δραστηριότητα)</span></label>
+<textarea id="editNotes" placeholder="Προαιρετικές σημειώσεις..."></textarea>
+<div class="actions"><button onclick="closeModal()">Άκυρο</button><button id="deleteBtn" class="danger" onclick="deleteTask()">Διαγραφή</button><button onclick="saveTask()">Αποθήκευση</button></div>
+</div></div>
+
 <script>
+"use strict";
+const STORE="routine.userData";
 const COLORS={routine:"#8b95a7",hobby:"#b18cff",study:"#5ca8ff",food:"#f2a65a",exercise:"#58d68d",free:"#5ed5d1",errand:"#f3cf5b",commute:"#a7b0bf",work:"#ff6f7d",sleep:"#7184c7",event:"#ff91c8"};
-function autoCat(label){label=label.toLowerCase();if(label.includes("ζωγραφ")||label.includes("μπάσο")||label.includes("hobby"))return "hobby";if(label.includes("διπλω"))return "study";if(label.includes("προπό"))return "exercise";if(label.includes("ελεύθερ"))return "free";if(label.includes("φαγη")||label.includes("καφές έξω"))return "food";if(label.includes("supermarket")||label.includes("δουλειές σπιτι"))return "errand";if(label.includes("μετάβαση"))return "commute";if(label.includes("δουλειά")||label.includes("άφιξη"))return "work";if(label.includes("ύπνο"))return "sleep";return "routine"}
-const S={
-1:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Ελεύθερος χρόνος"],["16:00–16:50","Προπόνηση"],["16:50–17:35","Ντους / ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-2:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Ελεύθερος χρόνος"],["16:00–16:50","Προπόνηση"],["16:50–17:35","Ντους / ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-3:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Ελεύθερος χρόνος"],["16:00–16:50","Προπόνηση"],["16:50–17:35","Ντους / ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-4:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Καφές έξω (Playlist / μουσική)"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Καφές έξω"],["15:00–16:00","Φαγητό έξω"],["16:00–17:35","Supermarket"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-5:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Λούσιμο / περιποίηση"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Δουλειές σπιτιού"],["16:00–16:50","Ελεύθερος χρόνος"],["16:50–17:35","Ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-6:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Ζωγραφική"],["13:00–14:00","Free hobby"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Supermarket"],["16:00–16:50","Ελεύθερος χρόνος"],["16:50–17:35","Ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]],
-0:[["11:30–12:00","Πρωινό: καφές / τουαλέτα"],["12:00–13:00","Μπάσο"],["13:00–14:00","Διπλωματική"],["14:00–15:00","Φαγητό + άραγμα"],["15:00–16:00","Ελεύθερος χρόνος"],["16:00–16:50","Προπόνηση"],["16:50–17:35","Ντους / ετοιμασία"],["17:35–17:45","Μετάβαση στη δουλειά"],["17:45–18:00","Άφιξη στη δουλειά"],["18:00–03:00","Δουλειά"],["03:30–11:30","Ύπνος"]]
+const BASE={
+1:[["11:30–12:00","Πρωινό: καφές / τουαλέτα","routine"],["12:00–13:00","Ζωγραφική","hobby"],["13:00–14:00","Διπλωματική","study"],["14:00–15:00","Φαγητό + άραγμα","food"],["15:00–16:00","Ελεύθερος χρόνος","free"],["16:00–16:50","Προπόνηση","exercise"],["16:50–17:35","Ντους / ετοιμασία","routine"],["17:35–17:45","Μετάβαση στη δουλειά","commute"],["17:45–18:00","Άφιξη / προετοιμασία στη δουλειά","work"],["18:00–03:00","Δουλειά","work"],["03:30–11:30","Ύπνος","sleep"]],
+2:[["11:30–12:00","Πρωινό: καφές / τουαλέτα","routine"],["12:00–13:00","Μπάσο","hobby"],["13:00–14:00","Διπλωματική","study"],["14:00–15:00","Φαγητό + άραγμα","food"],["15:00–16:00","Ελεύθερος χρόνος","free"],["16:00–16:50","Προπόνηση","exercise"],["16:50–17:35","Ντους / ετοιμασία","routine"],["17:35–17:45","Μετάβαση στη δουλειά","commute"],["17:45–18:00","Άφιξη / προετοιμασία στη δουλειά","work"],["18:00–03:00","Δουλειά","work"],["03:30–11:30","Ύπνος","sleep"]],
+3:[["11:30–12:00","Πρωινό: καφές / τουαλέτα","routine"],["12:00–13:00","Ζωγραφική","hobby"],["13:00–14:00","Διπλωματική","study"],["14:00–15:00","Φαγητό + άραγμα","food"],["15:00–16:00","Ελεύθερος χρόνος","free"],["16:00–16:50","Προπόνηση","exercise"],["16:50–17:35","Ντους / ετοιμασία","routine"],["17:35–17:45","Μετάβαση στη δουλειά","commute"],["17:45–18:00","Άφιξη / προετοιμασία στη δουλειά","work"],["18:00–03:00","Δουλειά","work"],["03:30–11:30","Ύπνος","sleep"]],
+4:[["11:30–12:00","Πρωινό: καφές / τουαλέτα","routine"],["12:00–13:00","Καφές έξω (Playlist / μουσική)","food"],["13:00–14:00","Διπλωματική","study"],["14:00–15:00","Καφές έξω","food"],["15:00–16:00","Φαγητό έξω","food"],["16:00–17:35","Supermarket","errand"],["17:35–17:45","Μετάβαση στη δουλειά","commute"],["17:45–18:00","Άφιξη / προετοιμασία στη δουλειά","work"],["18:00–03:00","Δουλειά","work"],["03:30–11:30","Ύπνος","sleep"]],
+5:[["11:30–12:00","Πρωινό: καφές / τουαλέτα","routine"],["12:00–13:00","Μπάσο","hobby"],["13:00–14:00","Λούσιμο / περιποίηση","routine"],["14:00–15:00","Φαγητό + άραγμα","food"],["15:00–16:00","Δουλειές σπιτιού","errand"],["16:00–16:50","Ελεύθερος χρόνος","free"],["16:50–17:35","Ετοιμασία","routine"],["17:35–17:45","Μετάβαση στη δουλειά","commute"],["17:45–18:00","Άφιξη / προετοιμασία στη δουλειά","work"],["18:00–03:00","Δουλειά","work"],["03:30–11:30","Ύπνος","sleep"]],
+6:[["11:30–12:00","Πρωινό: καφές / τουαλέτα","routine"],["12:00–13:00","Ζωγραφική","hobby"],["13:00–14:00","Free hobby","hobby"],["14:00–15:00","Φαγητό + άραγμα","food"],["15:00–16:00","Supermarket","errand"],["16:00–16:50","Ελεύθερος χρόνος","free"],["16:50–17:35","Ετοιμασία","routine"],["17:35–17:45","Μετάβαση στη δουλειά","commute"],["17:45–18:00","Άφιξη / προετοιμασία στη δουλειά","work"],["18:00–03:00","Δουλειά","work"],["03:30–11:30","Ύπνος","sleep"]],
+0:[["11:30–12:00","Πρωινό: καφές / τουαλέτα","routine"],["12:00–13:00","Μπάσο","hobby"],["13:00–14:00","Διπλωματική","study"],["14:00–15:00","Φαγητό + άραγμα","food"],["15:00–16:00","Ελεύθερος χρόνος","free"],["16:00–16:50","Προπόνηση","exercise"],["16:50–17:35","Ντους / ετοιμασία","routine"],["17:35–17:45","Μετάβαση στη δουλειά","commute"],["17:45–18:00","Άφιξη / προετοιμασία στη δουλειά","work"],["18:00–03:00","Δουλειά","work"],["03:30–11:30","Ύπνος","sleep"]]
 };
-const names=["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
-let day=Math.min(31,Math.max(1,new Date().getMonth()==9&&new Date().getFullYear()==2026?new Date().getDate():1));
-const key="octoberRoutine2026.v5", customKey="octoberRoutine2026.v5.custom";
-let data=JSON.parse(localStorage.getItem(key)||"{}");
-let custom=JSON.parse(localStorage.getItem(customKey)||"{}");
-let editing=null;
-function defaults(d){return S[new Date(2026,9,d).getDay()].map(x=>[x[0],x[1]])}
-function tasks(d){return custom[d] || defaults(d)}
-function save(){localStorage.setItem(key,JSON.stringify(data));localStorage.setItem(customKey,JSON.stringify(custom));updateMonth()}
+const DAYNAMES=["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
+let now=new Date(),day=(now.getFullYear()===2026&&now.getMonth()===9)?now.getDate():1,editing=null;
+let db=loadDB(); migrateLegacy();
+
+function loadDB(){try{let x=JSON.parse(localStorage.getItem(STORE)||"null");if(x&&x.version===1&&x.dates)return x}catch(e){}return{version:1,dates:{}}}
+function saveDB(){localStorage.setItem(STORE,JSON.stringify(db))}
+function dateKey(d){return `2026-10-${String(d).padStart(2,"0")}`}
+function uid(){return "u"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function baseTasks(d){let wd=new Date(2026,9,d).getDay();return BASE[wd].map((x,i)=>({id:`b${wd}-${i}`,time:x[0],label:x[1],cat:x[2],notes:"",done:false}))}
+function currentTasks(d){let rec=db.dates[dateKey(d)];return rec&&Array.isArray(rec.activities)?rec.activities:baseTasks(d)}
+function materialize(d){let k=dateKey(d);if(!db.dates[k])db.dates[k]={activities:baseTasks(d)};return db.dates[k].activities}
+function startMinutes(t){let m=String(t).match(/(\d{1,2}):(\d{2})/);if(!m)return 9999;let v=(+m[1])*60+(+m[2]);if(v<360)v+=1440;return v}
+function sortTasks(a){a.sort((x,y)=>startMinutes(x.time)-startMinutes(y.time))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+
+function migrateLegacy(){
+ if(localStorage.getItem("routine.migrationDone")==="1")return;
+ try{
+  let oldCustom=JSON.parse(localStorage.getItem("octoberRoutine2026.v4.custom")||localStorage.getItem("octoberRoutine2026.custom")||"{}");
+  let oldTicks=JSON.parse(localStorage.getItem("octoberRoutine2026.v4.ticks")||localStorage.getItem("octoberRoutine2026")||"{}");
+  for(let d=1;d<=31;d++){
+   let src=oldCustom[d],ticks=oldTicks[d]||{};
+   if(src||Object.keys(ticks).length){
+    let arr;
+    if(Array.isArray(src))arr=src.map((x,i)=>Array.isArray(x)?{id:uid(),time:x[0],label:x[1],cat:"event",notes:"",done:!!ticks[i]}:{id:x.id||uid(),time:x.time||"",label:x.label||"",cat:x.cat||"event",notes:x.notes||"",done:!!ticks[i]});
+    else arr=baseTasks(d).map((x,i)=>({...x,done:!!ticks[i]}));
+    sortTasks(arr);db.dates[dateKey(d)]={activities:arr};
+   }
+  }
+  saveDB();
+ }catch(e){}
+ localStorage.setItem("routine.migrationDone","1");
+}
+
 function render(){
- const date=new Date(2026,9,day), list=tasks(day), done=(data[day]||{});
- let n=Object.values(done).filter(Boolean).length;
- document.getElementById("content").innerHTML=`<div class="date">${names[date.getDay()]} ${day} Οκτωβρίου <span class="small">· ${n}/${list.length}</span></div>`+
- list.map((x,i)=>`<div><div class="task ${done[i]?"done":""}" style="--cat:${COLORS[x[3]||autoCat(x[1])]}" onclick="toggleNotes(${i})"><label class="taskBody" onclick="event.stopPropagation()"><input type="checkbox" ${done[i]?"checked":""} onchange="tick(${i},this.checked)"><span class="time">${esc(x[0])}</span><span class="label">${esc(x[1])}</span></label><button class="editBtn" onclick="event.stopPropagation();openEdit(${i})" aria-label="Επεξεργασία">✎</button></div>${x[2]?`<div class="notes" id="note-${i}">${esc(x[2])}</div>`:""}</div>`).join("")+
- `<button class="addBtn" onclick="openAdd()">＋ Προσθήκη δραστηριότητας</button>`+
- (custom[day]?`<button class="addBtn" onclick="restoreDay()">↺ Επαναφορά αρχικού προγράμματος</button>`:"");
+ let date=new Date(2026,9,day),list=currentTasks(day),n=list.filter(x=>x.done).length;
+ content.innerHTML=`<div class="date">${DAYNAMES[date.getDay()]} ${day} Οκτωβρίου <span class="small">· ${n}/${list.length}</span></div>`+
+ list.map((x,i)=>`<div><div class="task ${x.done?"done":""}" style="--cat:${COLORS[x.cat]||COLORS.event}" onclick="toggleNotes('${x.id}')"><label class="taskMain" onclick="event.stopPropagation()"><input type="checkbox" ${x.done?"checked":""} onchange="setDone('${x.id}',this.checked)"><span class="time">${esc(x.time)}</span><span class="label">${esc(x.label)}</span></label><button class="editBtn" onclick="event.stopPropagation();openEdit('${x.id}')">✎</button></div>${x.notes?`<div class="notes" id="note-${x.id}">${esc(x.notes)}</div>`:""}</div>`).join("")+
+ `<button class="addBtn" onclick="openAdd()">＋ Προσθήκη δραστηριότητας</button>`;
  updateMonth()
 }
-function tick(i,v){data[day]=data[day]||{};data[day][i]=v;save();render()}
-function toggleNotes(i){let el=document.getElementById("note-"+i);if(el)el.classList.toggle("show")}
-function move(n){day=Math.min(31,Math.max(1,day+n));render();scrollTo(0,0)}
-function goToday(){let d=new Date();day=(d.getFullYear()==2026&&d.getMonth()==9)?d.getDate():1;render()}
-function resetDay(){if(confirm("Να καθαρίσουν τα ✓ αυτής της ημέρας;")){delete data[day];save();render()}}
-function resetAll(){if(confirm("Να διαγραφούν ΟΛΑ τα ✓ του Οκτωβρίου; Οι αλλαγές δραστηριοτήτων θα παραμείνουν.")){data={};save();render()}}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-function ensureCustom(){if(!custom[day]) custom[day]=defaults(day)}
-function openEdit(i){editing=i;let x=tasks(day)[i];modalTitle.textContent="Επεξεργασία";editTime.value=x[0];editLabel.value=x[1];editNotes.value=x[2]||"";editCat.value=x[3]||autoCat(x[1]);deleteBtn.style.display="block";modal.classList.add("show")}
-function openAdd(){editing=-1;modalTitle.textContent="Νέα δραστηριότητα";editTime.value="";editLabel.value="";editNotes.value="";editCat.value="event";deleteBtn.style.display="none";modal.classList.add("show")}
-function closeModal(){document.getElementById("modal").classList.remove("show")}
+function setDone(id,v){let a=materialize(day),x=a.find(x=>x.id===id);if(x)x.done=v;saveDB();render()}
+function toggleNotes(id){let n=document.getElementById("note-"+id);if(n)n.classList.toggle("show")}
+function move(n){day=Math.max(1,Math.min(31,day+n));render();scrollTo(0,0)}
+function goToday(){let d=new Date();day=(d.getFullYear()===2026&&d.getMonth()===9)?d.getDate():1;render()}
+function openEdit(id){editing=id;let x=currentTasks(day).find(x=>x.id===id);modalTitle.textContent="Επεξεργασία";editTime.value=x.time;editLabel.value=x.label;editCat.value=x.cat||"event";editNotes.value=x.notes||"";deleteBtn.style.display="block";modal.classList.add("show")}
+function openAdd(){editing=null;modalTitle.textContent="Νέα δραστηριότητα";editTime.value="";editLabel.value="";editCat.value="event";editNotes.value="";deleteBtn.style.display="none";modal.classList.add("show")}
+function closeModal(){modal.classList.remove("show")}
 function backdrop(e){if(e.target.id==="modal")closeModal()}
-function saveTask(){let t=editTime.value.trim(),l=editLabel.value.trim(),n=editNotes.value.trim(),c=editCat.value;if(!t||!l){alert("Συμπλήρωσε ώρα και δραστηριότητα.");return}ensureCustom();if(editing===-1)custom[day].push([t,l,n,c]);else custom[day][editing]=[t,l,n,c];save();closeModal();render()}
-function deleteTask(){if(editing<0)return;if(!confirm("Να διαγραφεί αυτή η δραστηριότητα;"))return;ensureCustom();custom[day].splice(editing,1);let old=data[day]||{},next={};Object.keys(old).forEach(k=>{let n=+k;if(n<editing)next[n]=old[k];else if(n>editing)next[n-1]=old[k]});data[day]=next;save();closeModal();render()}
-function restoreDay(){if(confirm("Να επανέλθει αυτή η ημέρα στο αρχικό εβδομαδιαίο πρόγραμμα;")){delete custom[day];delete data[day];save();render()}}
-function updateMonth(){
- let total=0,done=0;
- for(let d=1;d<=31;d++){let l=tasks(d);total+=l.length;done+=Object.values(data[d]||{}).filter(Boolean).length}
- let p=Math.round(done/total*100);
- document.getElementById("monthText").textContent=`Μηνιαία πρόοδος · ${p}%`;
- document.getElementById("monthFill").style.width=p+"%";
- document.getElementById("monthStats").textContent=`${done} από ${total} δραστηριότητες`;
+function saveTask(){
+ let time=editTime.value.trim(),label=editLabel.value.trim();if(!time||!label){alert("Συμπλήρωσε ώρα και δραστηριότητα.");return}
+ let a=materialize(day);
+ if(editing){let x=a.find(x=>x.id===editing);if(x){x.time=time;x.label=label;x.cat=editCat.value;x.notes=editNotes.value.trim()}}
+ else a.push({id:uid(),time,label,cat:editCat.value,notes:editNotes.value.trim(),done:false});
+ sortTasks(a);saveDB();closeModal();render()
 }
+function deleteTask(){if(!editing)return;if(!confirm("Να διαγραφεί αυτή η δραστηριότητα μόνο από αυτή την ημερομηνία;"))return;let a=materialize(day),i=a.findIndex(x=>x.id===editing);if(i>=0)a.splice(i,1);saveDB();closeModal();render()}
+function clearChecks(){let a=materialize(day);a.forEach(x=>x.done=false);saveDB();render()}
+function restoreDay(){if(!confirm("Να επανέλθει μόνο αυτή η ημερομηνία στο αρχικό πρόγραμμα;"))return;delete db.dates[dateKey(day)];saveDB();render()}
+function updateMonth(){let total=0,done=0;for(let d=1;d<=31;d++){let a=currentTasks(d);total+=a.length;done+=a.filter(x=>x.done).length}let p=total?Math.round(done/total*100):0;monthText.textContent=`Μηνιαία πρόοδος · ${p}%`;monthFill.style.width=p+"%";monthStats.textContent=`${done} από ${total} δραστηριότητες`}
 render();
 </script>
 </body>
